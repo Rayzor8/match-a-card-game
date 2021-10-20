@@ -7,8 +7,10 @@
 // if it doesnt match flip the card and delay the logic of remove classlist so it cant be clicked again, so user can see the second card has been selected
 // --- fix bug section--
 // 6.)If card clicked when setTimeout is running, broke the logic, so lock handle click fuction if setTimeout delay is running, add lock statement on function
-// 7.) card double click ?? dilanjut besok
-
+// 7A.)Card double click bug , if first click and second click at the same card evaluate to same dataset, to handle this bug add more condition if DOM element is the same with firstCard return the function.
+// 7B.)Add resetCard logic to handleClick event, reset hasFLipped,lockFucntion to false, (back to very first statement) and reset firstCard,secondCard state to null / empty element,  (back to very first statement)
+// 7C.)So in checkMatch function, if dataset is match  reset state, else if unmatch reset state too and reset state on secondClick card. 
+// 7C .) if match the logic will remove the eventlistener thats why bug happen , so if match remove event and reset state
 //=============================== execution===================================
 
 // logic plan number 1
@@ -22,19 +24,19 @@ let lockFunction = false;
 const flipCard = (e) => {
   //logic plan number 6
   if (lockFunction) return;
-  //   if (e.path[1] === firstCard) return
+  // logic plan number 7A
+  if (e.path[1] === firstCard) return;
   //logic plan number 3
   e.path[1].classList.add('flip');
 
   // logic plan number 4
   if (!hasFlipped) {
-    hasFlipped = !hasFlipped;
+    hasFlipped = true;
     firstCard = e.path[1];
   } else {
-    hasFlipped = !hasFlipped;
+    // hasFlipped = !hasFlipped;
     secondCard = e.path[1];
-
-    // logic plan number 5 inside else
+    // logic plan number 5
     checkMatch();
   }
 };
@@ -46,19 +48,29 @@ function checkMatch() {
 
 // if match disable click event
 function disableEvent() {
+  console.log('match')
   firstCard.removeEventListener('click', flipCard);
   secondCard.removeEventListener('click', flipCard);
+  resetState()
 }
 
 // if not match remove flip class / auto flip
 function unFlipCard() {
-  lockFunction = !lockFunction;
+  console.log('not match')
+  lockFunction = true;
   setTimeout(() => {
     firstCard.classList.remove('flip');
     secondCard.classList.remove('flip');
-    lockFunction = !lockFunction;
+    resetState()
   }, 1200);
 }
+
+// logic plan number 7B
+function resetState(){
+   [hasFlipped,lockFunction] = [false,false]
+   [firstCard,secondCard] = [null,null]
+}
+
 
 // immediately invoke this function and do suffle the front face card
 (function shuffleCard() {
